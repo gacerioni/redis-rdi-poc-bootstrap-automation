@@ -6,7 +6,7 @@
 
 # Variables
 FILES=(
-    "https://qa-onprem.s3.amazonaws.com/redis-di/1.2.5/rdi-installation-1.2.5.tar.gz"
+    "https://qa-onprem.s3.amazonaws.com/redis-di/1.2.4/rdi-installation-1.2.4.tar.gz"
     "https://s3.amazonaws.com/redis-latam-rdi-poc-deps/redislabs-7.4.2-216-focal-amd64.tar"
 )
 DEST_DIR="/root"
