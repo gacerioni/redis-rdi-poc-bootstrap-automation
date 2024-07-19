@@ -26,7 +26,14 @@ for FILE_URL in "${FILES[@]}"; do
   FILE_NAME=$(basename "$FILE_URL")
   FOLDER_NAME="${FILE_NAME%%.*}"
   mkdir -p "$DEST_DIR/$FOLDER_NAME"
+  echo "Downloading $FILE_NAME..."
   wget -q "$FILE_URL" -P "$DEST_DIR/$FOLDER_NAME/"
+  if [ $? -eq 0 ]; then
+    echo "$FILE_NAME downloaded successfully."
+  else
+    echo "Error downloading $FILE_NAME."
+    exit 1
+  fi
 done
 echo "Files downloaded and moved successfully."
 
