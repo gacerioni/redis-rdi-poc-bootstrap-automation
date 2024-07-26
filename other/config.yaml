@@ -1,0 +1,31 @@
+sources:
+  oracle:
+    type: cdc
+    logging:
+      # log level, vamos deixar DEBUG
+      level: debug
+    connection:
+      type: oracle
+      host: exacc02ctg-db02.prodam
+      port: 1521
+      user: c##dbzuser
+      password: <NADA>
+    advanced:
+      source:
+        database.dbname: ORA059
+        database.pdb.name: pora058
+        decimal.handling.mode: precise
+        value.converter.schemas.enable: true
+        key.converter.schemas.enable: true
+        # caso a gente precise filtrar algumas tabelas do schema
+        table.include.list: SYS_SUS_DES.TB_ESTABELECIMENTO_SAUDE
+processors:
+  # pra escrever no redis como json
+  target_data_type: json 
+targets:
+  target:
+    connection:
+      type: redis
+      host: localhost
+      port: 12001
+      password: secret42
