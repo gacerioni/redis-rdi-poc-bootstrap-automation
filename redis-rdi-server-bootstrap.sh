@@ -6,8 +6,8 @@
 
 # Variables
 FILES=(
-    "https://qa-onprem.s3.amazonaws.com/redis-di/1.2.4/rdi-installation-1.2.4.tar.gz"
-    "https://s3.amazonaws.com/redis-latam-rdi-poc-deps/redislabs-7.4.2-216-focal-amd64.tar"
+    "https://qa-onprem.s3.amazonaws.com/redis-di/1.2.4/rdi-installation-1.2.7.tar.gz"
+    "https://s3.amazonaws.com/redis-latam-rdi-poc-deps/redislabs-7.4.6-22-focal-amd64.tar"
 )
 DEST_DIR="/root"
 SYSCTL_CONF="/etc/sysctl.conf"
