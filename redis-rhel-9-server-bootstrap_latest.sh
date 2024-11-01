@@ -56,9 +56,9 @@ else
 fi
 
 # Optional STEP - For Auto Tier and Redis Flex - RoF (many names same process)
-echo "Optional - Redis Flex - Calling Redis Software prepare_flash script..."
-/opt/redislabs/sbin/prepare_flash.sh
-echo "Optional - Redis Flex - prepare_flash script execution is complete!"
+#echo "Optional - Redis Flex - Calling Redis Software prepare_flash script..."
+#/opt/redislabs/sbin/prepare_flash.sh
+#echo "Optional - Redis Flex - prepare_flash script execution is complete!"
 
 # Validation
 echo "Validating setup..."
@@ -92,3 +92,4 @@ else
 fi
 
 echo "All validations passed. Bootstrap script completed successfully."
+echo "If you are about to install RS for RoF/Flex/Auto-Tier, please remember to run /opt/redislabs/sbin/prepare_flash.sh after the install.sh script!"
