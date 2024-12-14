@@ -1,15 +1,16 @@
 #!/bin/bash
 
-# Bootstrap Script for Redis Software on RHEL 9
+# Bootstrap Script for Redis Software on Ubuntu 20.04
 # Author: Gabriel Cerioni - Redis Solutions Architect
-# Date: 2024-11-01
+# Date: 2024-07-08
 
 # Variables
 FILES=(
-    "https://s3.amazonaws.com/redis-enterprise-software-downloads/7.4.6/redislabs-7.4.6-102-rhel9-x86_64.tar"
+    "https://redis-latam-rdi-poc-deps.s3.us-east-1.amazonaws.com/redislabs-7.8.2-60-focal-amd64.tar"
 )
 DEST_DIR="/root"
 SYSCTL_CONF="/etc/sysctl.conf"
+RESOLVED_CONF="/etc/systemd/resolved.conf"
 FSTAB="/etc/fstab"
 
 # Ensure the script is run as root
@@ -18,13 +19,7 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# Update system and install wget
-echo "Updating system and installing wget..."
-dnf update -y
-dnf install -y wget
-echo "System updated and wget installed."
-
-# Download files to /root in their own folders
+# Move files to /root in their own folders
 echo "Downloading and moving files to $DEST_DIR..."
 for FILE_URL in "${FILES[@]}"; do
   FILE_NAME=$(basename "$FILE_URL")
@@ -38,7 +33,14 @@ echo "Files downloaded and moved successfully."
 echo "Updating $SYSCTL_CONF to avoid port collisions..."
 echo "net.ipv4.ip_local_port_range = 30000 65535" >> $SYSCTL_CONF
 sysctl -p
-echo "sysctl.conf updated."
+
+# Ensure port 53 is available
+echo "Ensuring port 53 is available..."
+sed -i '/^#DNSStubListener=/a DNSStubListener=no' $RESOLVED_CONF
+mv /etc/resolv.conf /etc/resolv.conf.orig
+ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+systemctl restart systemd-resolved
+echo "Port 53 is now available."
 
 # Turn off swap
 echo "Turning off swap..."
@@ -46,19 +48,11 @@ swapoff -a
 sed -i.bak '/ swap / s/^(.*)$/#1/g' $FSTAB
 echo "Swap turned off and configured to remain off after reboot."
 
-# Check if port 53 is available
-echo "Checking if port 53 is available..."
-if ! ss -tuln | grep ':53 '; then
-  echo "Port 53 is available."
-else
-  echo "Port 53 is in use. Please investigate."
-  exit 1
-fi
-
-# Optional STEP - For Auto Tier and Redis Flex - RoF (many names same process)
-#echo "Optional - Redis Flex - Calling Redis Software prepare_flash script..."
-#/opt/redislabs/sbin/prepare_flash.sh
-#echo "Optional - Redis Flex - prepare_flash script execution is complete!"
+# Install net-tools
+echo "Installing net-tools..."
+apt-get update
+apt-get install -y net-tools
+echo "Net-tools installed successfully."
 
 # Validation
 echo "Validating setup..."
@@ -83,6 +77,14 @@ else
   exit 1
 fi
 
+# Check if port 53 is available
+if ! netstat -tuln | grep ':53 '; then
+  echo "Port 53 is available."
+else
+  echo "Port 53 is NOT available."
+  exit 1
+fi
+
 # Check if swap is off
 if ! swapon --show | grep -q 'swap'; then
   echo "Swap is turned off."
@@ -92,4 +94,3 @@ else
 fi
 
 echo "All validations passed. Bootstrap script completed successfully."
-echo "If you are about to install RS for RoF/Flex/Auto-Tier, please remember to run /opt/redislabs/sbin/prepare_flash.sh after the install.sh script!"

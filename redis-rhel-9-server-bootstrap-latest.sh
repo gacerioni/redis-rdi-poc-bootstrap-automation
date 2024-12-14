@@ -2,11 +2,11 @@
 
 # Bootstrap Script for Redis Software on RHEL 9
 # Author: Gabriel Cerioni - Redis Solutions Architect
-# Date: 2024-09-05
+# Date: 2024-11-01
 
 # Variables
 FILES=(
-    "https://redis-latam-rdi-poc-deps.s3.amazonaws.com/redislabs-7.4.6-22-rhel9-x86_64.tar"
+    "https://redis-latam-rdi-poc-deps.s3.us-east-1.amazonaws.com/redislabs-7.8.2-60-rhel9-x86_64.tar"
 )
 DEST_DIR="/root"
 SYSCTL_CONF="/etc/sysctl.conf"
@@ -55,6 +55,11 @@ else
   exit 1
 fi
 
+# Optional STEP - For Auto Tier and Redis Flex - RoF (many names same process)
+#echo "Optional - Redis Flex - Calling Redis Software prepare_flash script..."
+#/opt/redislabs/sbin/prepare_flash.sh
+#echo "Optional - Redis Flex - prepare_flash script execution is complete!"
+
 # Validation
 echo "Validating setup..."
 
@@ -87,3 +92,4 @@ else
 fi
 
 echo "All validations passed. Bootstrap script completed successfully."
+echo "If you are about to install RS for RoF/Flex/Auto-Tier, please remember to run /opt/redislabs/sbin/prepare_flash.sh after the install.sh script!"
