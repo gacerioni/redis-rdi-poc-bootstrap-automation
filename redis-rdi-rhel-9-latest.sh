@@ -100,3 +100,4 @@ fi
 
 # Install Redis Software and RDI (Placeholder for Manual Installation Steps)
 echo "Setup complete. Proceed with installing Redis Software and RDI as per documentation."
+echo "If you are about to install RS for RoF/Flex/Auto-Tier, please remember to run /opt/redislabs/sbin/prepare_flash.sh after the install.sh script!"
