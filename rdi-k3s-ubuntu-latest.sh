@@ -8,6 +8,7 @@
 FILES=(
     "https://s3.amazonaws.com/redis-latam-rdi-poc-deps/rdi-installation-1.4.4.tar.gz"
 )
+
 DEST_DIR="/root"
 
 # Ensure the script is run as root
