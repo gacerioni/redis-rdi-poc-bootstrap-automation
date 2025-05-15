@@ -2,7 +2,7 @@
 
 # Bootstrap Script for Redis RDI PoC on Ubuntu 20.04
 # Author: Gabriel Cerioni - Redis Solutions Architect
-# Date: 2024-07-17
+# Date: 2025-05-15
 
 # Variables
 FILES=(
