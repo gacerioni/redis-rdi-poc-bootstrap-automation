@@ -2,11 +2,11 @@
 
 # Bootstrap Script for Redis Software and RDI on RHEL 9
 # Author: Gabriel Cerioni - Redis Solutions Architect
-# Date: 2024-12-13
+# Date: 2025-05-15
 
 # Variables
 FILES=(
-    "https://s3.amazonaws.com/redis-latam-rdi-poc-deps/rdi-installation-1.4.4.tar.gz"
+    "https://redis-latam-rdi-poc-deps.s3.us-east-1.amazonaws.com/rdi-installation-1.8.0.tar.gz"
 )
 DEST_DIR="/root"
 
