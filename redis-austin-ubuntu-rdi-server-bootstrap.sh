@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Bootstrap Script for Redis RDI PoC on Ubuntu 20.04
+# Bootstrap Script for Redis RDI PoC on Ubuntu 22.04
 # Author: Gabriel Cerioni - Redis Solutions Architect
 # Date: 2025-05-15
 
