@@ -6,8 +6,8 @@
 
 # Variables
 FILES=(
-    "https://redis-latam-rdi-poc-deps.s3.us-east-1.amazonaws.com/redislabs-7.8.2-60-rhel9-x86_64.tar"
-    "https://s3.amazonaws.com/redis-latam-rdi-poc-deps/rdi-installation-1.4.2.tar.gz"
+    "https://redis-latam-rdi-poc-deps.s3.us-east-1.amazonaws.com/redislabs-7.22.0-241-rhel9-x86_64.tar"
+    "https://s3.amazonaws.com/redis-latam-rdi-poc-deps/rdi-installation-1.12.3.tar.gz"
 )
 DEST_DIR="/root"
 SYSCTL_CONF="/etc/sysctl.conf"
