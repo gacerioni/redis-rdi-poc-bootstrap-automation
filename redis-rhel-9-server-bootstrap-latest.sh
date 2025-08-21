@@ -31,7 +31,7 @@ require_root() {
 pkg_install() {
   log "Updating system and installing required packages..."
   dnf -y update
-  dnf -y install wget lsof
+  dnf -y install wget lsof iproute
   log "System updated and dependencies installed."
 }
 
@@ -51,32 +51,28 @@ download_artifacts() {
   log "Downloads complete."
 }
 
-# --- replace the old tune_sysctl() with this one ---
 tune_sysctl() {
   log "Applying sysctl tuning for ephemeral ports (avoid RS collisions)..."
 
-  # 1) Set runtime value immediately (takes effect now)
+  # 1) Set runtime value immediately (current boot)
   sysctl -w net.ipv4.ip_local_port_range="30000 65535" >/dev/null
 
-  # 2) Persist: ensure it's in /etc/sysctl.conf (wins after sysctl.d)
-  if grep -qE '^\s*net\.ipv4\.ip_local_port_range\s*=' /etc/sysctl.conf; then
-    # Replace any existing definition
+  # 2) Persist in /etc/sysctl.conf (loaded after sysctl.d and wins)
+  if grep -qE '^\s*net\.ipv4\.ip_local_port_range\s*=' /etc/sysctl.conf 2>/dev/null; then
     sed -ri 's|^\s*net\.ipv4\.ip_local_port_range\s*=.*$|net.ipv4.ip_local_port_range = 30000 65535|' /etc/sysctl.conf
   else
     printf '\n# Redis Enterprise: avoid ephemeral port collisions\nnet.ipv4.ip_local_port_range = 30000 65535\n' >> /etc/sysctl.conf
   fi
-
-  # 3) Reload only /etc/sysctl.conf to preserve the precedence behavior
   sysctl -p /etc/sysctl.conf >/dev/null
 
-  # 4) Extra: keep the drop-in too (harmless, useful on clean hosts)
-  mkdir -p /etc/sysctl.d
-  cat > /etc/sysctl.d/99-redis.conf <<'EOF'
+  # 3) Also keep a drop-in (harmless; helpful on clean hosts)
+  mkdir -p "$(dirname "${SYSCTL_DROPIN}")"
+  cat > "${SYSCTL_DROPIN}" <<EOF
 # Redis Enterprise: avoid ephemeral port collisions with RS ports
 net.ipv4.ip_local_port_range = 30000 65535
 EOF
 
-  log "Sysctl applied (runtime + /etc/sysctl.conf persisted)."
+  log "Sysctl applied (runtime + persisted)."
 }
 
 disable_swap() {
@@ -110,7 +106,7 @@ service_stop_disable() {
 ensure_port_53_free() {
   log "Ensuring port 53/UDP and 53/TCP are free..."
 
-  # 1) If dnsmasq is installed and running, stop/disable it
+  # 1) If dnsmasq is installed/running, stop/disable it
   if command -v dnsmasq >/dev/null 2>&1 || rpm -q dnsmasq >/dev/null 2>&1; then
     if systemctl is-active --quiet dnsmasq; then
       warn "dnsmasq is active; stopping to free port 53."
@@ -120,12 +116,11 @@ ensure_port_53_free() {
 
   # 2) Also consider other common resolvers that may hold :53
   service_stop_disable "named"              # BIND
-  service_stop_disable "systemd-resolved"   # not typical on RHEL, but just in case
+  service_stop_disable "systemd-resolved"   # uncommon on RHEL but safe
 
-  # 3) Re-check port usage
+  # 3) Re-check port usage (both TCP/UDP)
   local offenders=""
-  # ss returns listeners; grab program/pid when available
-  offenders="$(ss -tulpnH | awk '($5 ~ /:53$/){print}' || true)"
+  offenders="$(ss -tulpnH | awk '($5 ~ /(^|:|\[|\*|\])53$/){print}' || true)"
 
   if [[ -n "${offenders}" ]]; then
     echo "${offenders}" | while read -r line; do
@@ -147,24 +142,32 @@ validate() {
       && log "OK: ${DEST_DIR}/${FOLDER_NAME}/${FILE_NAME}" \
       || die "Missing: ${DEST_DIR}/${FOLDER_NAME}/${FILE_NAME}"
   done
-  # sysctl applied
-  if sysctl net.ipv4.ip_local_port_range 2>/dev/null | grep -q "30000 65535"; then
-    log "OK: sysctl port range set."
+
+  # sysctl applied (read kernel value, not files)
+  local pr first last
+  pr="$(sysctl -n net.ipv4.ip_local_port_range 2>/dev/null || true)"  # e.g. "30000 65535"
+  first="$(awk '{print $1}' <<<"$pr")"
+  last="$(awk '{print $2}' <<<"$pr")"
+  if [[ "$first" == "30000" && "$last" == "65535" ]]; then
+    log "OK: sysctl port range set to ${first} ${last}."
   else
-    die "sysctl port range not set."
+    die "sysctl port range not set (got: '${pr}')."
   fi
+
   # swap off
   if ! swapon --show | grep -q 'swap'; then
     log "OK: swap is off."
   else
     die "Swap still on."
   fi
+
   # port 53 free
-  if ss -tulpnH | awk '($5 ~ /:53$/){exit 1}'; then
+  if ss -tulpnH | awk '($5 ~ /(^|:|\[|\*|\])53$/){exit 1}'; then
     log "OK: port 53 free."
   else
     die "Port 53 not free."
   fi
+
   log "All validations passed."
 }
 
@@ -175,9 +178,7 @@ main() {
   tune_sysctl
   disable_swap
   ensure_port_53_free
-
   validate
-
   log "Bootstrap completed successfully."
   log "If you plan to use RoF/Flex/Auto-Tier, remember to run /opt/redislabs/sbin/prepare_flash.sh after install.sh."
 }
