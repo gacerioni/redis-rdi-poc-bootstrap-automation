@@ -51,15 +51,32 @@ download_artifacts() {
   log "Downloads complete."
 }
 
+# --- replace the old tune_sysctl() with this one ---
 tune_sysctl() {
-  log "Applying sysctl tuning via ${SYSCTL_DROPIN}..."
-  mkdir -p "$(dirname "${SYSCTL_DROPIN}")"
-  cat > "${SYSCTL_DROPIN}" <<'EOF'
+  log "Applying sysctl tuning for ephemeral ports (avoid RS collisions)..."
+
+  # 1) Set runtime value immediately (takes effect now)
+  sysctl -w net.ipv4.ip_local_port_range="30000 65535" >/dev/null
+
+  # 2) Persist: ensure it's in /etc/sysctl.conf (wins after sysctl.d)
+  if grep -qE '^\s*net\.ipv4\.ip_local_port_range\s*=' /etc/sysctl.conf; then
+    # Replace any existing definition
+    sed -ri 's|^\s*net\.ipv4\.ip_local_port_range\s*=.*$|net.ipv4.ip_local_port_range = 30000 65535|' /etc/sysctl.conf
+  else
+    printf '\n# Redis Enterprise: avoid ephemeral port collisions\nnet.ipv4.ip_local_port_range = 30000 65535\n' >> /etc/sysctl.conf
+  fi
+
+  # 3) Reload only /etc/sysctl.conf to preserve the precedence behavior
+  sysctl -p /etc/sysctl.conf >/dev/null
+
+  # 4) Extra: keep the drop-in too (harmless, useful on clean hosts)
+  mkdir -p /etc/sysctl.d
+  cat > /etc/sysctl.d/99-redis.conf <<'EOF'
 # Redis Enterprise: avoid ephemeral port collisions with RS ports
 net.ipv4.ip_local_port_range = 30000 65535
 EOF
-  sysctl --system >/dev/null
-  log "Sysctl applied."
+
+  log "Sysctl applied (runtime + /etc/sysctl.conf persisted)."
 }
 
 disable_swap() {
