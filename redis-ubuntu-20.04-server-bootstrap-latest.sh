@@ -6,7 +6,7 @@
 
 # Variables
 FILES=(
-    "https://redis-latam-rdi-poc-deps.s3.us-east-1.amazonaws.com/redislabs-7.8.2-60-focal-amd64.tar"
+    "https://redis-latam-rdi-poc-deps.s3.us-east-1.amazonaws.com/redislabs-7.22.0-250-focal-amd64.tar"
 )
 DEST_DIR="/root"
 SYSCTL_CONF="/etc/sysctl.conf"
