@@ -9,7 +9,7 @@ set -euo pipefail
 # Config
 # -------------------------
 FILES=(
-  "https://redis-latam-rdi-poc-deps.s3.us-east-1.amazonaws.com/redislabs-7.22.0-241-rhel9-x86_64.tar"
+  "https://redis-latam-rdi-poc-deps.s3.us-east-1.amazonaws.com/redislabs-7.22.2-14-rhel9-x86_64.tar"
 )
 DEST_DIR="/root"
 SYSCTL_DROPIN="/etc/sysctl.d/99-redis.conf"
