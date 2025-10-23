@@ -6,7 +6,7 @@
 
 # Variables
 FILES=(
-    "https://s3.amazonaws.com/redis-enterprise-software-downloads/8.0.2/redislabs-8.0.2-17-jammy-arm64.tar"
+    "https://s3.amazonaws.com/redis-enterprise-software-downloads/8.0.2/redislabs-8.0.2-17-jammy-amd64.tar"
 )
 DEST_DIR="/root"
 SYSCTL_CONF="/etc/sysctl.conf"
