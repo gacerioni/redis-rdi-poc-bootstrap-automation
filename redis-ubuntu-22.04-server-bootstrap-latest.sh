@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Bootstrap Script for Redis Software on Ubuntu 20.04
+# Bootstrap Script for Redis Software on Ubuntu 22.04
 # Author: Gabriel Cerioni - Redis Solutions Architect
-# Date: 2024-07-08
+# Date: 2025-11-13
 
 # Variables
 FILES=(
