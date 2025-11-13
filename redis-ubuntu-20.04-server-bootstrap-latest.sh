@@ -2,11 +2,11 @@
 
 # Bootstrap Script for Redis Software on Ubuntu 20.04
 # Author: Gabriel Cerioni - Redis Solutions Architect
-# Date: 2024-07-08
+# Date: 2025-11-13
 
 # Variables
 FILES=(
-    "https://redis-latam-rdi-poc-deps.s3.us-east-1.amazonaws.com/redislabs-7.22.0-250-focal-amd64.tar"
+    "https://s3.amazonaws.com/redis-enterprise-software-downloads/8.0.2/redislabs-8.0.2-17-focal-amd64.tar"
 )
 DEST_DIR="/root"
 SYSCTL_CONF="/etc/sysctl.conf"
